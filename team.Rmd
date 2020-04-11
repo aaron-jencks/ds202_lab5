@@ -1,0 +1,33 @@
+---
+title: DS202 Lab 5
+author: Aaron Jencks, Eli Musgrove
+date: 4/11/2020
+output: html_document
+---
+
+## Data Background
+
+```{r}
+acc = read_csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
+person = read_csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringAsFactors = FALSE)
+```
+
+## Part One
+
+1. Are there some days of the week where more accidents happen than on others?
+2. What time of the day to accidents happen?
+3. What is the number of accidents with at least one drunk driver?
+
+## Part Two
+
+4. In the `person` table, identify drivers and subset them
+5. Join accident and person table.
+6. Tally the number of accidents by day of the week and gender. Visualize the results.
+
+## Part Three
+
+7. Now plot a chloropleth map of accidents on a county level
+	- Read the description for `STATE` and `COUNTY` columns in the manual. The state & county codes are Geographic Locator Codes from [the General Services Acministration's GSA publication](https://www.gsa.gov/reference/geographic-locator-codes/glcs-for-the-us-and-us-territories)
+	- Use `readxl::read_xlsx` to read in the GLCs.
+8. Visualize the number of accidents in each county using a chloropleth map. To do this, you need to join the accident data, GLCs, and appropriate map date.
+9. Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
