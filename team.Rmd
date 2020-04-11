@@ -5,22 +5,61 @@ date: 4/11/2020
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(tidyr)
+library(plotly)
+library(lubridate)
+```
+
 ## Data Background
 
 ```{r}
-acc = read_csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
-person = read_csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringAsFactors = FALSE)
+acc = read_csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv")  #, stringsAsFactors = FALSE)
+person = read_csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv")  #, stringAsFactors = FALSE)
+
+str(acc)
+str(person)
 ```
 
 ## Part One
 
 1. Are there some days of the week where more accidents happen than on others?
+
+```{r}
+ggplot(acc, aes(x=DAY_WEEK)) + geom_bar()
+```
+
+There are definitely more accidents on the weekends than on other days of the weeks, thought, it would seem that Thursday and Friday also represent slightly higher counts than others.
+
 2. What time of the day to accidents happen?
+
+```{r}
+acc = acc %>% filter(HOUR < 25)
+ggplot(acc, aes(x=HOUR)) + geom_bar()
+```
+
+There seems to be more accidents the later in the day it gets, right up to about 6p, then it starts to decline. There are also spikes in the earlier hours when people leave to go to work, and when they break for lunch.
+
 3. What is the number of accidents with at least one drunk driver?
+
+```{r}
+ggplot(acc, aes(x=DRUNK_DR)) + geom_bar()
+sum(acc$DRUNK_DR > 0)
+```
+
+There are roughly 8667 accidents involving at least one drunk driver
 
 ## Part Two
 
 4. In the `person` table, identify drivers and subset them
+
+```{r}
+
+```
+
 5. Join accident and person table.
 6. Tally the number of accidents by day of the week and gender. Visualize the results.
 
