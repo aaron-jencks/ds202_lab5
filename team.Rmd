@@ -8,8 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 library(dplyr)
 library(ggplot2)
+library(ggrepel)
 library(readr)
-library(tidyr)
 library(plotly)
 library(lubridate)
 ```
@@ -57,11 +57,27 @@ There are roughly 8667 accidents involving at least one drunk driver
 4. In the `person` table, identify drivers and subset them
 
 ```{r}
-
+# names(person)
+# names(acc)
+drivers = person %>% filter(PER_TYP == 1)
+# str(drivers)
 ```
 
 5. Join accident and person table.
+
+```{r}
+joined = left_join(acc, person, by = "ST_CASE")
+str(joined)
+```
+
 6. Tally the number of accidents by day of the week and gender. Visualize the results.
+
+```{r}
+summ = joined %>% mutate(SEX = factor(SEX, levels=c(1, 2), labels=c('MALE', 'FEMALE'))) %>% filter(!is.na(SEX)) %>% group_by(DAY_WEEK, SEX) %>% summarize(count=n())
+ggplot(summ, aes(x=DAY_WEEK, y=count, fill=SEX, label=count)) + geom_bar(stat="identity", position="dodge") + geom_text(vjust=-0.25)
+```
+
+On average, there seems to be at least twice as many accidents caused my men, than there are women, like almost exactly twice as many, a little less on Thursday.
 
 ## Part Three
 
