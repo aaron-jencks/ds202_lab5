@@ -6,8 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-library(dplyr)
-library(ggplot2)
+library(tidyverse)
 library(ggrepel)
 library(readr)
 library(plotly)
@@ -84,5 +83,37 @@ On average, there seems to be at least twice as many accidents caused my men, th
 7. Now plot a chloropleth map of accidents on a county level
 	- Read the description for `STATE` and `COUNTY` columns in the manual. The state & county codes are Geographic Locator Codes from [the General Services Acministration's GSA publication](https://www.gsa.gov/reference/geographic-locator-codes/glcs-for-the-us-and-us-territories)
 	- Use `readxl::read_xlsx` to read in the GLCs.
+
+```{r}
+# Load maps, get state and county lines
+suppressMessages(suppressWarnings(library(maps)))
+suppressMessages(suppressWarnings(library(mapproj)))
+county = map_data('county')
+
+# Read glc data ignoring datatype warnings
+glc = suppressMessages(suppressWarnings(readxl::read_excel('glc.xlsx', sheet='GeoLocation_UnitedStates')))
+glc$'State Code' = as.numeric(glc$'State Code')
+glc$'County Code' = as.numeric(glc$'County Code')
+glc$'County Name' = tolower(glc$'County Name') 
+glc$'State Name' = tolower(glc$'State Name') 
+```
+
 8. Visualize the number of accidents in each county using a chloropleth map. To do this, you need to join the accident data, GLCs, and appropriate map date.
+
+```{r}
+# Join data
+acc_counties = acc %>% group_by(STATE, COUNTY) %>% summarize(num=n()) %>% select(STATE, COUNTY, num)
+final_data = glc %>% left_join(acc_counties, by=c('State Code' = 'STATE', 'County Code' = 'COUNTY')) %>% right_join(county, by=c('State Name' = 'region', 'County Name' = 'subregion'))
+
+# Plot ech county
+ggplot(final_data, aes(x=long, y=lat, fill=num)) + geom_polygon(aes(group=group)) + coord_map() + ggtitle('Fatal Accidents per. County')
+```
+
 9. Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
+
+##### In the summer, certain states have a large rise in accidents compared to their respective average while others have a large drop. For Florida, it is a state that is a common vacation destination in the winter. This means there are a large number of additional drivers on the road during this time. In Iowa and Maine, however, 2 cold states, there is more travel during the summer. I believe this is a larger factor than the possible weather during these times. Florida rarely gets snow, so this is unlikely a factor in the increased fatality rates in winter months. Iowa and Main, both cold states, have the rise in the summer, so weather is also not a factor during these times.
+```{r}
+seasonal_accidents = acc %>% select(STATE, MONTH) %>% left_join(glc, by=c('STATE' = 'State Code')) %>% rename('state_name' = 'State Name') %>% filter(state_name %in% c('iowa', 'florida', 'maine')) %>% group_by(state_name, MONTH) %>% mutate(num = n()) %>% ungroup()
+
+seasonal_accidents %>% group_by(state_name, MONTH) %>% ggplot(aes(x=MONTH, fill=num)) + geom_bar() + facet_wrap(~state_name) + ylab('Number of fatal accidents') + xlab('Month') + ggtitle('Fatal Accidents')
+```
